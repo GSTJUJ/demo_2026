@@ -1,98 +1,107 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
-from .models import Headset, Order, OrderItem
+from django.urls import reverse
+
+from .models import Car, Order, OrderItem
 
 
-class HeadsetModelTest(TestCase):
-    """Тестирование модели Headset"""
+class CarModelTest(TestCase):
+    """Тестирование модели Car"""
 
     def setUp(self):
-        self.headset = Headset.objects.create(
-            name="G Pro X",
-            brand="Logitech",
-            price=5000.00,
-            description="Игровая гарнитура",
-            is_wireless=False,
-            stock=15
+        self.car = Car.objects.create(
+            make="Toyota",
+            model="Camry",
+            year=2022,
+            price=2500000.00,
+            mileage_km=45000,
+            description="Седан в отличном состоянии",
+            is_new=False,
+            stock=15,
         )
 
-    def test_headset_creation(self):
-        """Проверка создания гарнитуры"""
-        self.assertEqual(self.headset.name, "G Pro X")
-        self.assertEqual(self.headset.brand, "Logitech")
-        self.assertEqual(self.headset.price, 5000.00)
-        self.assertFalse(self.headset.is_wireless)
-        self.assertEqual(self.headset.stock, 15)
+    def test_car_creation(self):
+        """Проверка создания автомобиля"""
+        self.assertEqual(self.car.make, "Toyota")
+        self.assertEqual(self.car.model, "Camry")
+        self.assertEqual(self.car.year, 2022)
+        self.assertEqual(float(self.car.price), 2500000.00)
+        self.assertEqual(self.car.mileage_km, 45000)
+        self.assertFalse(self.car.is_new)
+        self.assertEqual(self.car.stock, 15)
 
 
 class OrderTest(TestCase):
-    """Тестирование создания заказа и расчёта суммы"""
+    """Тестирование создания заказа и списания склада"""
 
     def setUp(self):
-        self.user = User.objects.create_user(
-            username="testuser",
-            password="12345"
+        self.user = User.objects.create_user(username="testuser", password="12345")
+
+        self.car = Car.objects.create(
+            make="BMW",
+            model="X5",
+            year=2021,
+            price=6000000.00,
+            mileage_km=70000,
+            description="Тестовый автомобиль",
+            is_new=False,
+            stock=10,
         )
 
-        self.headset = Headset.objects.create(
-            name="Cloud II",
-            brand="HyperX",
-            price=3000.00,
-            description="Тестовая гарнитура",
-            is_wireless=True,
-            stock=10
-        )
-
-    def test_order_total_price(self):
-        """Проверка расчёта общей суммы заказа"""
-
+    def test_order_total_price_and_stock_decrease(self):
+        """Проверка расчёта общей суммы заказа и уменьшения stock"""
         order = Order.objects.create(user=self.user)
 
         OrderItem.objects.create(
             order=order,
-            headset=self.headset,
+            car=self.car,
             quantity=3
         )
 
-        # Получаем элементы заказа напрямую
-        items = OrderItem.objects.filter(order=order)
+        order.refresh_from_db()
 
-        total = sum(
-            item.headset.price * item.quantity
-            for item in items
-        )
-
-        self.assertEqual(total, 9000.00)
+        # Проверяем сумму через property total_price (использует items + price_at_moment)
+        self.assertEqual(float(order.total_price), 18000000.00)
 
         # Проверяем уменьшение остатка товара
-        self.headset.refresh_from_db()
-        self.assertEqual(self.headset.stock, 7)
+        self.car.refresh_from_db()
+        self.assertEqual(self.car.stock, 7)
 
 
 class ViewTest(TestCase):
     """Тестирование представлений"""
 
     def setUp(self):
-        self.user = User.objects.create_user(
-            username="client",
-            password="12345"
-        )
+        self.user = User.objects.create_user(username="client", password="12345")
 
-        Headset.objects.create(
-            name="Arctis 7",
-            brand="SteelSeries",
-            price=7000.00,
-            description="Беспроводная гарнитура",
-            is_wireless=True,
-            stock=20
+        Car.objects.create(
+            make="Kia",
+            model="Rio",
+            year=2020,
+            price=1200000.00,
+            mileage_km=80000,
+            description="Городской автомобиль",
+            is_new=False,
+            stock=20,
         )
 
     def test_guest_page_status_code(self):
         """Проверка доступности страницы для гостей"""
-        response = self.client.get('/shop/guest/')
+        # У нас guest_view привязан к path("", ...) => главная "/"
+        response = self.client.get(reverse("guest"))
         self.assertEqual(response.status_code, 200)
 
     def test_login(self):
         """Проверка авторизации пользователя"""
-        login = self.client.login(username="client", password="12345")
-        self.assertTrue(login)
+        ok = self.client.login(username="client", password="12345")
+        self.assertTrue(ok)
+
+    def test_car_list_requires_login(self):
+        """Проверка что каталог авто требует авторизацию"""
+        response = self.client.get(reverse("car_list"))
+        # Django redirect на login
+        self.assertEqual(response.status_code, 302)
+
+        self.client.login(username="client", password="12345")
+        response2 = self.client.get(reverse("car_list"))
+        self.assertEqual(response2.status_code, 200)
