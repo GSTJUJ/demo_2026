@@ -1,0 +1,63 @@
+{% load static %}
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Каталог авто (гость)</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-badge"></div>
+        <div>Demo car shop</div>
+      </div>
+      <div class="nav">
+        <a class="pill" href="{% url 'login' %}">Войти</a>
+      </div>
+    </div>
+
+    <div class="hero">
+      <h1 class="h1">Каталог автомобилей</h1>
+      <p class="sub">Просмотр доступных авто. Для оформления заказа нужен вход.</p>
+    </div>
+
+    <div class="grid">
+      {% for c in cars %}
+        <div class="card">
+          <div class="card-body">
+            <div class="row">
+              <div>
+                <p class="card-title">{{ c.make }} {{ c.model }} ({{ c.year }})</p>
+                <p class="card-meta">
+                  {% if c.is_new %}
+                    <span class="badge">Новый</span>
+                  {% else %}
+                    <span class="badge">С пробегом</span>
+                  {% endif %}
+                  <span class="badge">Пробег: {{ c.mileage_km }} км</span>
+                  <span class="badge">В наличии: {{ c.stock }}</span>
+                </p>
+              </div>
+            </div>
+
+            <div class="price">{{ c.price }} ₽</div>
+
+            {% if c.description %}
+              <p class="card-meta" style="margin-top:10px;">{{ c.description|truncatechars:140 }}</p>
+            {% endif %}
+
+            <div class="note" style="margin-top:12px;">
+              Чтобы оформить заказ — <a href="{% url 'login' %}" class="pill">войдите</a>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="note">Автомобилей пока нет.</div>
+      {% endfor %}
+    </div>
+  </div>
+</body>
+</html>

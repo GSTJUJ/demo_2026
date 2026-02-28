@@ -1,0 +1,70 @@
+{% load static %}
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Заказы</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-badge"></div>
+        <div>Demo car shop</div>
+      </div>
+
+      <div class="nav">
+        <a class="pill" href="{% url 'car_list' %}">Автомобили</a>
+        <a class="pill" href="{% url 'order_list' %}">Заказы</a>
+        <span class="user-chip">@{{ request.user.username }}</span>
+        <a class="pill" href="{% url 'logout' %}">Выход</a>
+      </div>
+    </div>
+
+    <div class="hero">
+      <div class="row">
+        <div>
+          <h1 class="h1">Заказы</h1>
+          <p class="sub">Менеджер/админ видит все заказы, клиент — только свои.</p>
+        </div>
+        <div>
+          <a class="btn primary" href="{% url 'order_create' %}">+ Новый заказ</a>
+        </div>
+      </div>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Пользователь</th>
+            <th>Статус</th>
+            <th>Дата</th>
+            <th class="right">Сумма</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for o in orders %}
+            <tr>
+              <td>#{{ o.id }}</td>
+              <td>{{ o.user.username }}</td>
+              <td>{{ o.get_status_display }}</td>
+              <td>{{ o.created_at|date:"d.m.Y H:i" }}</td>
+              <td class="right">{{ o.total_price }} ₽</td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="5" class="small">Заказов пока нет.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <div class="note">
+        Сейчас это список заказов.
+      </div>
+    </div>
+  </div>
+</body>
+</html>

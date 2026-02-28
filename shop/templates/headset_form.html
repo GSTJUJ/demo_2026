@@ -1,0 +1,47 @@
+{% load static %}
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Автомобиль</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-badge"></div>
+        <div>Demo car shop</div>
+      </div>
+      <div class="nav">
+        <a class="pill" href="{% url 'car_list' %}">Назад к каталогу</a>
+        <a class="pill" href="{% url 'logout' %}">Выход</a>
+      </div>
+    </div>
+
+    <div class="hero">
+      <h1 class="h1">Форма автомобиля</h1>
+      <p class="sub">Заполни поля и сохрани.</p>
+
+      <div class="card" style="margin-top:14px;">
+        <div class="card-body">
+          <form method="post" class="form">
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <div class="toolbar" style="justify-content:flex-start;">
+              <button class="btn primary" type="submit">Сохранить</button>
+              <a class="btn" href="{% url 'car_list' %}">Отмена</a>
+            </div>
+          </form>
+
+          <div class="note">
+            Поля: make/model/year/price/mileage_km/stock/is_new/description.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,18 +1,53 @@
-<!DOCTYPE html>
-<html>
+{% load static %}
+<!doctype html>
+<html lang="ru">
 <head>
-    <title>Вход | HeadsetStore</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Вход</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
-    <h2>Вход в систему</h2>
+  <div class="container auth">
+    <div class="card">
+      <div class="card-body">
+        <div class="row" style="justify-content:flex-start; gap:12px;">
+          <div class="brand-badge"></div>
+          <div>
+            <h1 class="h1" style="margin:0;">Вход в автосалон</h1>
+            <p class="sub" style="margin:4px 0 0;">Demo car shop — каталог и заказы</p>
+          </div>
+        </div>
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Войти</button>
-    </form>
+        {% if error %}
+          <div class="note" style="border-color: rgba(251,113,133,.55);">
+            {{ error }}
+          </div>
+        {% endif %}
 
-    <br>
-    <a href="/shop/guest/">Продолжить как гость</a>
+        <form method="post" class="form" style="margin-top:14px;">
+          {% csrf_token %}
+          <div class="field" style="min-width:100%;">
+            <label for="username">Логин</label>
+            <input id="username" name="username" placeholder="например: admin" autocomplete="username" required>
+          </div>
+
+          <div class="field" style="min-width:100%;">
+            <label for="password">Пароль</label>
+            <input id="password" name="password" type="password" placeholder="••••••••" autocomplete="current-password" required>
+          </div>
+
+          <button class="btn primary" type="submit" style="width:100%;">Войти</button>
+        </form>
+
+        <div class="note">
+          <div class="small">
+            Посмотреть каталог без входа:
+            <a class="pill" href="{% url 'guest' %}" style="display:inline-block; margin-left:8px;">Гостевой режим</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

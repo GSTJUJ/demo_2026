@@ -1,0 +1,101 @@
+{% load static %}
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Автомобили</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-badge"></div>
+        <div>Demo car shop</div>
+      </div>
+
+      <div class="nav">
+        <a class="pill" href="{% url 'car_list' %}">Автомобили</a>
+        <a class="pill" href="{% url 'order_list' %}">Заказы</a>
+        <span class="user-chip">@{{ request.user.username }}</span>
+        <a class="pill" href="{% url 'logout' %}">Выход</a>
+      </div>
+    </div>
+
+    <div class="hero">
+      <h1 class="h1">Каталог автомобилей</h1>
+      <p class="sub">Поиск и просмотр авто. Админ может добавлять/редактировать.</p>
+
+      <div class="toolbar">
+        <form method="get" class="form">
+          <div class="field">
+            <label for="search">Поиск (марка/модель)</label>
+            <input id="search" name="search" value="{{ request.GET.search }}" placeholder="например: Toyota">
+          </div>
+
+          <div class="field" style="min-width: 220px;">
+            <label for="sort">Сортировка</label>
+            <select id="sort" name="sort">
+              <option value="">—</option>
+              <option value="price" {% if request.GET.sort == 'price' %}selected{% endif %}>По цене</option>
+              <option value="year" {% if request.GET.sort == 'year' %}selected{% endif %}>По году (сначала новые)</option>
+            </select>
+          </div>
+
+          <button class="btn" type="submit">Применить</button>
+
+          {% if request.GET.search or request.GET.sort %}
+            <a class="btn ghost" href="{% url 'car_list' %}">Сбросить</a>
+          {% endif %}
+        </form>
+
+        {% if request.user.is_superuser %}
+          <a class="btn primary" href="{% url 'car_create' %}">+ Добавить авто</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="grid">
+      {% for c in cars %}
+        <div class="card">
+          <div class="card-body">
+            <div class="row">
+              <div>
+                <p class="card-title">{{ c.make }} {{ c.model }} ({{ c.year }})</p>
+                <p class="card-meta">
+                  {% if c.is_new %}<span class="badge">Новый</span>{% else %}<span class="badge">С пробегом</span>{% endif %}
+                  <span class="badge">Пробег: {{ c.mileage_km }} км</span>
+                  <span class="badge">В наличии: {{ c.stock }}</span>
+                </p>
+              </div>
+              <div class="price">{{ c.price }} ₽</div>
+            </div>
+
+            {% if c.description %}
+              <p class="card-meta" style="margin-top:10px;">{{ c.description|truncatechars:160 }}</p>
+            {% endif %}
+
+            <div class="toolbar" style="margin-top:12px;">
+              <a class="btn primary" href="{% url 'order_create' %}">Оформить заказ</a>
+
+              {% if request.user.is_superuser %}
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                  <a class="btn" href="{% url 'car_update' c.id %}">Редактировать</a>
+                  <a class="btn danger" href="{% url 'car_delete' c.id %}">Удалить</a>
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="small" style="margin-top:8px;">
+              Заказ создаётся через форму (выбор авто + количество).
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="note">Автомобили не найдены.</div>
+      {% endfor %}
+    </div>
+  </div>
+</body>
+</html>

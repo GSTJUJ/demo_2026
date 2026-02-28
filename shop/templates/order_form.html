@@ -1,0 +1,53 @@
+{% load static %}
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Новый заказ</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-badge"></div>
+        <div>Demo car shop</div>
+      </div>
+      <div class="nav">
+        <a class="pill" href="{% url 'order_list' %}">Назад к заказам</a>
+        <a class="pill" href="{% url 'logout' %}">Выход</a>
+      </div>
+    </div>
+
+    <div class="hero">
+      <h1 class="h1">Новый заказ</h1>
+      <p class="sub">Выбери автомобиль и количество. Заказ создастся при отправке формы.</p>
+
+      {% if error %}
+        <div class="note" style="border-color: rgba(251,113,133,.55);">
+          {{ error }}
+        </div>
+      {% endif %}
+
+      <div class="card" style="margin-top:14px;">
+        <div class="card-body">
+          <form method="post" class="form">
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <div class="toolbar" style="justify-content:flex-start;">
+              <button class="btn primary" type="submit">Создать заказ</button>
+              <a class="btn" href="{% url 'order_list' %}">Отмена</a>
+            </div>
+          </form>
+
+          <div class="note">
+            Если “не хватает на складе” — увеличь stock у авто (или выбери другое).
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
