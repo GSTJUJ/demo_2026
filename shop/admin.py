@@ -1,3 +1,5 @@
 from django.contrib import admin
+from .models import Headset, Order
 
-# Register your models here.
+admin.site.register(Headset)
+admin.site.register(Order)

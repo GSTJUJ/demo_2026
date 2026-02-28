@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Вход | HeadsetStore</title>
+</head>
+<body>
+    <h2>Вход в систему</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Войти</button>
+    </form>
+
+    <br>
+    <a href="/shop/guest/">Продолжить как гость</a>
+</body>
+</html>
